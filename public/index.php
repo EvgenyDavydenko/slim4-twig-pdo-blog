@@ -4,6 +4,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Blog\PostMapper;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -21,6 +22,8 @@ try {
     die();
 }
 
+$postMapper = new PostMapper($connection);
+
 // Instantiate app
 $app = AppFactory::create();
 
@@ -28,15 +31,17 @@ $app = AppFactory::create();
 $app->addErrorMiddleware(true, false, false);
 
 // Add route callbacks
-$app->get('/', function (Request $request, Response $response, $args) use ($twig) {
-    $body = $twig->render('home.twig.html');
+$app->get('/', function (Request $request, Response $response, $args) use ($twig, $postMapper) {
+    $posts = $postMapper->getList();
+    $body = $twig->render('home.twig.html', ['posts' => $posts]);
     $response->getBody()->write($body);
     return $response;
 });
 
-$app->get('/{name}', function (Request $request, Response $response, $args) use ($twig) {
+$app->get('/{name}', function (Request $request, Response $response, $args) use ($twig, $postMapper) {
     $name = $args['name'];
-    $body = $twig->render('hello.twig.html', ['name' => $name]);
+    $post = $postMapper->getBySlug((string) $name);
+    $body = $twig->render('hello.twig.html', ['post' => $post]);
     $response->getBody()->write($body);
     return $response;
 });

@@ -4,5 +4,10 @@
         "slim/psr7": "^1.5",
         "twig/twig": "^3.3",
         "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Blog\\": "src/"
+        }
     }
 }
